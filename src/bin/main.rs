@@ -112,6 +112,7 @@ fn main() -> Result<(), String> {
                 // Wait for the first completed child
                 let mut first_completed = None;
 
+                // TODO: use condvar or something to reduce complete checking burden
                 while first_completed.is_none() {
                     for child in runners.iter_mut() {
                         let res = child.1.try_wait();

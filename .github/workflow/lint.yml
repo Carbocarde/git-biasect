@@ -1,0 +1,19 @@
+on: [push, pull_request]
+
+name: Lint
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Run cargo clippy
+        run: |
+          cargo clippy -- -D warnings
+
+      - name: Run cargo fmt
+        run: |
+          cargo fmt --all -- --check

@@ -1,0 +1,19 @@
+[package]
+name = "git-biasect"
+version = "0.0.1"
+edition = "2021"
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+path = "src/benches/benchmark.rs"
+harness = false
+
+[dependencies]
+argh = "0.1.12"
+float_eq = "1.0.1"
+rand = "0.8.5"
+rand_distr = "0.4.3"
+tested-trait = "0.1.0"

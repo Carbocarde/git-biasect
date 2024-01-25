@@ -72,7 +72,7 @@ pub fn reproducer_shell_commands(repo_path: &Path, command: &String, commit: &St
     )
 }
 
-pub fn run_script(repo_path: &Path, command: String, commit: String) -> Child {
+pub fn run_script(repo_path: &Path, command: &str, commit: &String) -> Child {
     let tempdir_cmd = Command::new("mktemp")
         .arg("-d")
         .arg("-t")

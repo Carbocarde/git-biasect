@@ -75,8 +75,8 @@ fn start_runners(
                 *commit_idx,
                 run_script(
                     &fs::canonicalize(repo_path).unwrap(),
-                    script_path.to_owned(),
-                    commits.get(*commit_idx).unwrap().clone(),
+                    script_path,
+                    commits.get(*commit_idx).unwrap(),
                 ),
             )
         })

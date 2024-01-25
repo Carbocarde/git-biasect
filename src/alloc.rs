@@ -94,7 +94,7 @@ pub fn init(commits: &Vec<String>, runners: usize, check_bookends: bool) -> Stat
 }
 
 fn invalidate_runners(
-    runners: Vec<usize>,
+    runners: &[usize],
     index: usize,
     status: Status,
 ) -> (Vec<usize>, HashSet<usize>) {
@@ -118,7 +118,7 @@ fn invalidate_runners(
                 invalidated_runners.iter().copied().collect(),
             )
         }
-        Status::Unknown => (runners, HashSet::new()),
+        Status::Unknown => (runners.to_vec(), HashSet::new()),
     }
 }
 
@@ -178,7 +178,7 @@ where
         .collect();
 
     let (remaining_runners, invalidated_runners) =
-        invalidate_runners(state.runners.commits.clone(), index, status);
+        invalidate_runners(&state.runners.commits, index, status);
     let bisection_range = get_range(&commits);
     let new_runners = F::alloc_runners(
         state.runners.total,
@@ -392,7 +392,6 @@ impl Allocator for BasicAllocator {
             // Dumbly allocate
             new_runners.extend(
                 valid_additions
-                    .clone()
                     .into_iter()
                     .filter(|x| !(existing_alloc.contains(x) || new_runners.contains(x)))
                     .take(new_runners_to_allocate)

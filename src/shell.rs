@@ -64,7 +64,7 @@ pub fn run_script(repo_path: &Path, command: String, commit: String) -> Child {
     let tempdir_cmd = Command::new("mktemp")
         .arg("-d")
         .arg("-t")
-        .arg("biasect")
+        .arg("biasect.XXXXXX")
         .output();
 
     if let Err(err) = tempdir_cmd {

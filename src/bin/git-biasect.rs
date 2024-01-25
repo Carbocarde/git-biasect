@@ -7,7 +7,8 @@ use std::os::unix::process::ExitStatusExt;
 use std::path::PathBuf;
 use std::process::Child;
 use std::str;
-use std::time::Instant;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 /**
 Git Biasect
@@ -112,7 +113,6 @@ fn main() -> Result<(), String> {
                 // Wait for the first completed child
                 let mut first_completed = None;
 
-                // TODO: use condvar or something to reduce complete checking burden
                 while first_completed.is_none() {
                     for child in runners.iter_mut() {
                         let res = child.1.try_wait();
@@ -121,6 +121,8 @@ fn main() -> Result<(), String> {
                             first_completed = Some((child.0, exit_status));
                         }
                     }
+                    // TODO: Replace with condvar or learn from the bisection script runtime to reduce compute burden
+                    sleep(Duration::from_secs(1));
                 }
 
                 let commit_index_exit_code = first_completed.unwrap();

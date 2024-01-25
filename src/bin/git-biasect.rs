@@ -1,6 +1,8 @@
 use argh::FromArgs;
 use git_biasect::alloc::{get_range, init, step, BasicAllocator, Status};
-use git_biasect::shell::{bisect_report, get_commits, run_script, worktree_prune};
+use git_biasect::shell::{
+    bisect_report, get_commits, reproducer_shell_commands, run_script, worktree_prune,
+};
 use git_biasect::visualize::print_commits;
 use std::fs;
 use std::os::unix::process::ExitStatusExt;
@@ -146,27 +148,49 @@ fn main() -> Result<(), String> {
                     commits.get(commit_index_exit_code.0).unwrap(),
                 );
 
-                let old_state = state;
-
                 // Check if result is invalid
                 // TODO: Nicer error messages that allow users to reproduce the failure with example commands
                 if commit_index_exit_code.0 == 0 && exit_status == Status::Bad {
                     // The first commit must be good - that's what the user told us when setting up the bisection!
-                    panic!(
-                        "Initial bisection bounds invalid. Commit: `{}` evaluated to bad with exit code {}. The oldest commit must not be bad.",
+                    eprintln!(
+                        "Initial bisection bounds invalid.\n\
+                        Commit: `{}` evaluated to bad with exit code {}.\n\
+                        The oldest commit must not be bad.\n\
+                        \n\
+                        Reproduce this failure with these commands:\n\
+                        {}",
                         commits.get(commit_index_exit_code.0).unwrap(),
-                        exit_code
+                        exit_code,
+                        reproducer_shell_commands(
+                            &run_opts.repo_path,
+                            &run_opts.script,
+                            &state.commits.get(commit_index_exit_code.0).unwrap().hash
+                        )
                     );
+                    return Ok(());
                 } else if commit_index_exit_code.0 == commits.len() - 1
                     && exit_status == Status::Good
                 {
                     // The last commit must be bad - that's what the user told us when setting up the bisection!
-                    panic!(
-                        "Initial bisection bounds invalid. Commit: `{}` evaluated to good with exit code {}. The newest commit must not be good.",
+                    eprintln!(
+                        "Initial bisection bounds invalid.\n\
+                        Commit: `{}` evaluated to good with exit code {}.\n\
+                        The newest commit must not be good.\n\
+                        \n\
+                        Reproduce this failure with these commands:\n\
+                        {}",
                         commits.get(commit_index_exit_code.0).unwrap(),
-                        exit_code
+                        exit_code,
+                        reproducer_shell_commands(
+                            &run_opts.repo_path,
+                            &run_opts.script,
+                            &state.commits.get(commit_index_exit_code.0).unwrap().hash
+                        )
                     );
+                    return Ok(());
                 }
+
+                let old_state = state;
 
                 // Perform step
                 let invalidated_runners;

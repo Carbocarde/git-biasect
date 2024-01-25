@@ -60,6 +60,18 @@ pub fn get_commits(repo_path: &Path) -> Result<Vec<String>, String> {
     Ok(hashes)
 }
 
+pub fn reproducer_shell_commands(repo_path: &Path, command: &String, commit: &String) -> String {
+    format!(
+        "export TESTDIR=$(mktemp -d -t biasect.XXXXXX)\n\
+        echo $TESTDIR\n\
+        cd $TESTDIR\n\
+        git -C {} worktree add $TESTDIR {commit} --detach\n\
+        {command}\n\
+        echo $?",
+        repo_path.as_os_str().to_str().unwrap()
+    )
+}
+
 pub fn run_script(repo_path: &Path, command: String, commit: String) -> Child {
     let tempdir_cmd = Command::new("mktemp")
         .arg("-d")

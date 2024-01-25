@@ -86,7 +86,7 @@ fn main() -> Result<(), String> {
 
     match args.subcommand {
         SubCommands::Run(run_opts) => {
-            let commits = get_commits(run_opts.repo_path.clone())?;
+            let commits = get_commits(&run_opts.repo_path)?;
             let mut state = init(&commits, run_opts.jobs, !run_opts.reckless);
             let mut runners;
 
@@ -263,7 +263,7 @@ fn main() -> Result<(), String> {
             let _ = worktree_prune(&run_opts.repo_path).wait();
         }
         SubCommands::Next(next_opts) => {
-            let commits = get_commits(next_opts.repo_path)?;
+            let commits = get_commits(&next_opts.repo_path)?;
 
             let state = init(&commits, 1, next_opts.check_bounds);
 

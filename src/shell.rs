@@ -1,16 +1,16 @@
 /// Functions that invoke shell commands
 use std::{
-    path::{Path, PathBuf},
+    path::Path,
     process::{Child, Command},
 };
 
 use crate::alloc::Status;
 
 /// Get commits. Ordered from old to new.
-pub fn get_commits(repo_path: PathBuf) -> Result<Vec<String>, String> {
+pub fn get_commits(repo_path: &Path) -> Result<Vec<String>, String> {
     let cmd_git_bisect_log = Command::new("git")
         .arg("-C")
-        .arg(repo_path.clone().into_os_string().into_string().unwrap())
+        .arg(repo_path.as_os_str().to_str().unwrap())
         .arg("bisect")
         .arg("visualize")
         .arg("--oneline")
@@ -39,7 +39,7 @@ pub fn get_commits(repo_path: PathBuf) -> Result<Vec<String>, String> {
         // Get known good commit
         let cmd_git_log = Command::new("git")
             .arg("-C")
-            .arg(repo_path.clone().into_os_string().into_string().unwrap())
+            .arg(repo_path.as_os_str().to_str().unwrap())
             .arg("log")
             .arg("--oneline")
             .arg("-n")

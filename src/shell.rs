@@ -118,6 +118,8 @@ pub fn bisect_report(repo_path: &Path, status: &Status, hash: &String) -> Child 
     };
 
     Command::new("git")
+        .arg("-C")
+        .arg(repo_path)
         .arg("bisect")
         .arg(action)
         .arg(hash)

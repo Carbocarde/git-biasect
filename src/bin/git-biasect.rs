@@ -1,12 +1,12 @@
 use argh::FromArgs;
-use git_biasect::alloc::{get_range, init, step, BasicAllocator, Status};
+use git_biasect::alloc::{init, step, BasicAllocator, CommitState, Status};
 use git_biasect::shell::{
     bisect_report, get_commits, reproducer_shell_commands, run_script, worktree_prune,
 };
 use git_biasect::visualize::print_commits;
 use std::fs;
 use std::os::unix::process::ExitStatusExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Child;
 use std::str;
 use std::thread::sleep;
@@ -83,6 +83,24 @@ fn start_runners(
         .collect()
 }
 
+fn bounds_validated(commits: &Vec<CommitState>, reckless_mode: bool) -> bool {
+    if reckless_mode || commits.is_empty() {
+        return true;
+    }
+
+    let commit_states = commits.iter().map(|x| x.status).collect::<HashSet<_>>();
+
+    commit_states.contains(&Status::Good) && commit_states.contains(&Status::Bad)
+}
+
+fn bisect_report_all(commits: &Vec<CommitState>, repo_path: &Path) {
+    for commit in commits {
+        if commit.status != Status::Unknown {
+            bisect_report(repo_path, &commit.status, &commit.hash);
+        }
+    }
+}
+
 fn main() -> Result<(), String> {
     let args: Args = argh::from_env();
 
@@ -140,13 +158,6 @@ fn main() -> Result<(), String> {
                 } else {
                     Status::Bad
                 };
-
-                // Report status to git
-                bisect_report(
-                    &run_opts.repo_path,
-                    &exit_status,
-                    commits.get(commit_index_exit_code.0).unwrap(),
-                );
 
                 // Check if result is invalid
                 // TODO: Nicer error messages that allow users to reproduce the failure with example commands
@@ -221,6 +232,26 @@ fn main() -> Result<(), String> {
                     commit_runtime,
                     current_runtime,
                 );
+
+                // Report status to git after ensuring bounds are valid
+                if bounds_validated(&state.commits, run_opts.reckless)
+                    && (commit_index_exit_code.0 == 0
+                        || commit_index_exit_code.0 == state.commits.len() - 1)
+                {
+                    // Report all bisection steps that have completed while validating the bounds
+                    println!(
+                        "Bounds newly validated, reporting commits {:?}",
+                        state.commits
+                    );
+                    bisect_report_all(&state.commits, &run_opts.repo_path);
+                } else if bounds_validated(&state.commits, run_opts.reckless) {
+                    // Report all bisection steps right away when bounds are validated
+                    bisect_report(
+                        &run_opts.repo_path,
+                        &exit_status,
+                        commits.get(commit_index_exit_code.0).unwrap(),
+                    );
+                }
 
                 // Cancel invalidated tasks
                 // TODO: Clean up temp folders

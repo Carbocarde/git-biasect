@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use tested_trait::{test_impl, tested_trait};
 
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub enum Status {
     Good,
     Bad,

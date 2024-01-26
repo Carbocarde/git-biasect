@@ -221,6 +221,13 @@ where
         total: state.runners.total,
     };
 
+    assert!(
+        !runners.commits.is_empty() || get_range(&commits).1.is_empty(),
+        "Scheduler fail! Commits remaining with no runners scheduled. Runners commit indexes: {:?} Commit range: {:?}",
+        runners.commits,
+        get_range(&state.commits).1
+    );
+
     (
         State {
             runtime_samples: [state.runtime_samples.clone(), vec![runtime]].concat(),

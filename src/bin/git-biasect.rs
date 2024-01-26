@@ -264,11 +264,6 @@ fn main() -> Result<(), String> {
 
                 runners = e_runners.into_iter().chain(n_runners).collect();
 
-                assert!(
-                    !runners.is_empty() || get_range(&state.commits).1.is_empty(),
-                    "Scheduler fail! Commits remaining with no runners scheduled."
-                );
-
                 if runners.is_empty() {
                     break;
                 }

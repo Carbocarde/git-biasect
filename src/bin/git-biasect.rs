@@ -4,6 +4,9 @@ use git_biasect::shell::{
     bisect_report, get_commits, reproducer_shell_commands, run_script, worktree_prune,
 };
 use git_biasect::visualize::print_commits;
+use rand::seq::IteratorRandom;
+use rand::{rngs::StdRng, SeedableRng};
+use std::collections::HashSet;
 use std::fs;
 use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
@@ -119,7 +122,11 @@ fn main() -> Result<(), String> {
                 &run_opts.script,
             );
 
+            let mut loop_iter = 0;
             loop {
+                loop_iter += 1;
+                let mut rng = StdRng::seed_from_u64(loop_iter);
+
                 print_commits(
                     state
                         .commits
@@ -133,8 +140,10 @@ fn main() -> Result<(), String> {
                 // Wait for the first completed child
                 let mut first_completed = None;
 
+                // Runner count doesn't update
+                let runners_count = runners.len();
                 while first_completed.is_none() {
-                    for child in runners.iter_mut() {
+                    for child in runners.iter_mut().choose_multiple(&mut rng, runners_count) {
                         let res = child.1.try_wait();
                         let res = res.unwrap();
                         if let Some(exit_status) = res {

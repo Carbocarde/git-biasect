@@ -1,7 +1,8 @@
 use argh::FromArgs;
 use git_biasect::alloc::{init, step, BasicAllocator};
 use git_biasect::shell::{
-    bisect_report, get_commits, reproducer_shell_commands, run_script, worktree_prune,
+    bisect_report, get_commit_files, get_commits, reproducer_shell_commands, run_script,
+    worktree_prune,
 };
 use git_biasect::visualize::print_commits;
 use git_biasect::{CommitState, Status};
@@ -111,6 +112,11 @@ fn main() -> Result<(), String> {
     match args.subcommand {
         SubCommands::Run(run_opts) => {
             let commits = get_commits(&run_opts.repo_path)?;
+            let _files_per_commit = commits
+                .iter()
+                .map(|hash| get_commit_files(&run_opts.repo_path, hash).unwrap())
+                .collect::<Vec<_>>();
+
             let mut state = init(&commits, run_opts.jobs, !run_opts.reckless);
             let mut runners;
 

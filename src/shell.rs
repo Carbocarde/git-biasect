@@ -60,6 +60,26 @@ pub fn get_commits(repo_path: &Path) -> Result<Vec<String>, String> {
     Ok(hashes)
 }
 
+pub fn get_commit_files(repo_path: &Path, hash: &str) -> Result<Vec<String>, String> {
+    let cmd_git_bisect_log = Command::new("git")
+        .arg("-C")
+        .arg(repo_path.as_os_str().to_str().unwrap())
+        .arg("diff-tree")
+        .arg("--no-commit-id")
+        .arg("--name-only")
+        .arg("-r")
+        .arg(hash)
+        .output()
+        .unwrap();
+    let out = String::from_utf8(cmd_git_bisect_log.stdout).unwrap();
+    let lines = out.lines();
+    let files: Vec<Option<&str>> = lines.map(|s| s.split(' ').next()).collect();
+
+    let unwrapped_files: Vec<String> = files.into_iter().map(|x| x.unwrap().to_string()).collect();
+
+    Ok(unwrapped_files)
+}
+
 pub fn reproducer_shell_commands(repo_path: &Path, command: &String, commit: &String) -> String {
     format!(
         "export TESTDIR=$(mktemp -d -t biasect.XXXXXX)\n\

@@ -1,9 +1,10 @@
 use argh::FromArgs;
-use git_biasect::alloc::{init, step, BasicAllocator, CommitState, Status};
+use git_biasect::alloc::{init, step, BasicAllocator};
 use git_biasect::shell::{
     bisect_report, get_commits, reproducer_shell_commands, run_script, worktree_prune,
 };
 use git_biasect::visualize::print_commits;
+use git_biasect::{CommitState, Status};
 use rand::seq::IteratorRandom;
 use rand::{rngs::StdRng, SeedableRng};
 use std::collections::HashSet;

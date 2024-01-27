@@ -1,36 +1,7 @@
 use std::collections::HashSet;
 use tested_trait::{test_impl, tested_trait};
 
-#[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
-pub enum Status {
-    Good,
-    Bad,
-    Skip,
-    Unknown,
-}
-
-#[derive(Debug, Clone)]
-pub struct CommitState {
-    pub hash: String,
-    pub status: Status,
-}
-
-#[derive(Debug)]
-pub struct Runners {
-    /// Runner to commit mapping
-    pub commits: Vec<usize>,
-    /// Runner start time
-    pub start_times: Vec<f64>,
-    total: usize,
-}
-
-#[derive(Debug)]
-pub struct State {
-    runtime_samples: Vec<f64>,
-    pub commits: Vec<CommitState>,
-    pub runners: Runners,
-    check_bookends: bool,
-}
+use crate::{CommitState, Runners, State, Status};
 
 // I'm pretty sure this is optimal for all common cases
 // There might be a better allocation by doubling-up on certain commits if somehow variance is very high and mean is low. Seems unlikely.

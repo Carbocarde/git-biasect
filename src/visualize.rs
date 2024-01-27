@@ -1,4 +1,4 @@
-use crate::alloc::Status;
+use crate::Status;
 
 pub fn print_commits(commits: &[Status], runners: &[usize]) {
     // TODO: Limit the range of commits to print.

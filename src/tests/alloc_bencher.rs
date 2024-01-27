@@ -1,7 +1,10 @@
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rand_distr::{Distribution, Normal};
 
-use crate::alloc::{get_range, init, step, Allocator, State, Status};
+use crate::{
+    alloc::{get_range, init, step, Allocator},
+    State, Status,
+};
 
 fn generate_runtime_for_commits(
     commits: usize,

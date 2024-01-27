@@ -4,7 +4,7 @@ use std::{
     process::{Child, Command},
 };
 
-use crate::alloc::Status;
+use crate::Status;
 
 /// Get commits. Ordered from old to new.
 pub fn get_commits(repo_path: &Path) -> Result<Vec<String>, String> {

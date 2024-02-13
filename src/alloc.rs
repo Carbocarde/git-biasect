@@ -5,12 +5,14 @@ use crate::{CommitState, Runners, State, Status};
 
 // I'm pretty sure this is optimal for all common cases
 // There might be a better allocation by doubling-up on certain commits if somehow variance is very high and mean is low. Seems unlikely.
-fn initial_alloc(commits: &Vec<String>, runners: usize, check_bookends: bool) -> Vec<usize> {
+fn initial_alloc(commits: &[String], runners: usize, check_bookends: bool) -> Vec<usize> {
     let mut runners_to_allocate = runners;
 
     if commits.len() <= runners_to_allocate {
         return (0..commits.len()).collect();
-    } else if runners_to_allocate == 0 {
+    }
+
+    if runners_to_allocate == 0 {
         return vec![];
     }
 
@@ -42,7 +44,7 @@ fn initial_alloc(commits: &Vec<String>, runners: usize, check_bookends: bool) ->
     new_runners.into_iter().collect()
 }
 
-pub fn init(commits: &Vec<String>, runners: usize, check_bookends: bool) -> State {
+pub fn init(commits: &[String], runners: usize, check_bookends: bool) -> State {
     let runner_commits = initial_alloc(commits, runners, check_bookends);
     let runner_start_times = runner_commits.iter().map(|_| 0.0).collect();
 
@@ -94,7 +96,7 @@ fn invalidate_runners(
 }
 
 /// Returns starting commit idx and slice
-pub fn get_range(commits: &Vec<CommitState>) -> (usize, &[CommitState]) {
+pub fn get_range(commits: &[CommitState]) -> (usize, &[CommitState]) {
     let oldest_good_idx = commits
         .iter()
         .enumerate()
@@ -146,7 +148,7 @@ where
                 c.clone()
             }
         })
-        .collect();
+        .collect::<Vec<_>>();
 
     let (remaining_runners, invalidated_runners) =
         invalidate_runners(&state.runners.commits, index, status);
@@ -202,7 +204,7 @@ where
     (
         State {
             runtime_samples: [state.runtime_samples.clone(), vec![runtime]].concat(),
-            commits,
+            commits: commits.to_vec(),
             runners,
             check_bookends: state.check_bookends,
         },

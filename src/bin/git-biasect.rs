@@ -88,7 +88,7 @@ fn start_runners(
         .collect()
 }
 
-fn bounds_validated(commits: &Vec<CommitState>, reckless_mode: bool) -> bool {
+fn bounds_validated(commits: &[CommitState], reckless_mode: bool) -> bool {
     if reckless_mode || commits.is_empty() {
         return true;
     }
